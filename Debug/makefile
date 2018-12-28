@@ -5,6 +5,7 @@
 -include ../makefile.init
 
 RM := rm -rf
+CROSS_COMPILE := arm-linux-gnueabihf-
 
 # All of the sources participating in the build are defined here
 -include sources.mk
@@ -40,25 +41,25 @@ all: loader.elf
 loader.elf: $(OBJS) $(USER_OBJS)
 	@echo 'Building target: $@'
 	@echo 'Invoking: Cross ARM C Linker'
-	arm-linux-gnueabihf-gcc -mcpu=cortex-a7 -marm -O2  -g -T ../loader.ld -nostartfiles -nodefaultlibs -nostdlib -Xlinker --gc-sections -Wl,-Map,"loader.map" -o "loader.elf" $(OBJS) $(USER_OBJS) $(LIBS)
+	$(CROSS_COMPILE)gcc -mcpu=cortex-a7 -marm -O2  -g -T ../loader.ld -nostartfiles -nodefaultlibs -nostdlib -Xlinker --gc-sections -Wl,-Map,"loader.map" -o "loader.elf" $(OBJS) $(USER_OBJS) $(LIBS)
 	@echo 'Finished building target: $@'
 	@echo ' '
 
 loader.bin: loader.elf
 	@echo 'Invoking: Cross ARM GNU Create Flash Image'
-	arm-linux-gnueabihf-objcopy -O binary "loader.elf"  "loader.bin"
+	$(CROSS_COMPILE)objcopy -O binary "loader.elf"  "loader.bin"
 	@echo 'Finished building: $@'
 	@echo ' '
 
 loader.siz: loader.elf
 	@echo 'Invoking: Cross ARM GNU Print Size'
-	arm-linux-gnueabihf-size --format=berkeley -x --totals "loader.elf"
+	$(CROSS_COMPILE)size --format=berkeley -x --totals "loader.elf"
 	@echo 'Finished building: $@'
 	@echo ' '
 
 # Other Targets
 clean:
-	-$(RM) $(OBJS)$(SECONDARY_FLASH)$(SECONDARY_SIZE)$(ASM_DEPS)$(S_UPPER_DEPS)$(C_DEPS) loader.elf
+	-$(RM) $(OBJS) $(SECONDARY_FLASH) $(SECONDARY_SIZE) $(ASM_DEPS) $(S_UPPER_DEPS) $(C_DEPS) loader.elf
 	-@echo ' '
 
 .PHONY: all clean dependents
